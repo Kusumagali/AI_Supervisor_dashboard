@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Frontdesk Assistant</title>
+</head>
+<body>
+  <h1>Welcome to Frontdesk Assistant 👋</h1>
+  <p>Ask your question below:</p>
+
+  <form method="POST" action="/ask">
+    <input type="text" name="question" placeholder="Type your question..." required>
+    <button type="submit">Ask</button>
+  </form>
+
+  <br>
+  <a href="{{ url_for('dashboard') }}">Go to Supervisor Dashboard</a>
+</body>
+</html>
