@@ -3,7 +3,7 @@
 A human-in-the-loop system where an AI handles customer questions and escalates to a human supervisor when needed. Built with Python, Flask, and SocketIO.
 
 
-## Project Structure
+# Project Structure
 
 ├── app.py # Flask backend + supervisor dashboard
 ├── ai_agent.py # AI agent that handles customer questions
