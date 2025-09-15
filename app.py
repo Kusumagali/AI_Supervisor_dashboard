@@ -48,6 +48,16 @@ def check_timeouts():
 
 threading.Thread(target=check_timeouts, daemon=True).start()
 
+# ------------------- ROUTES -------------------
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
+
 @app.route("/ask", methods=["POST"])
 def ask():
     question = request.form.get("question")  # from the form input
@@ -55,7 +65,7 @@ def ask():
         answer = "Hello! How can I help you?"
     else:
         answer = "Go to Supervisor Dashboard"
-    return answer  # or jsonify({"answer": answer})
+    return answer  # You can also return jsonify({"answer": answer})
 
 @app.route("/get_requests")
 def get_requests():
@@ -117,9 +127,12 @@ def update_request(req_id):
     socketio.emit("request_answered", requests_store[req_id])
     return jsonify({"message": "Request updated", "request": requests_store[req_id]})
 
+# ------------------- MAIN -------------------
+
 if __name__ == "__main__":
     host = "127.0.0.1"
     port = 5000
     print(f"🚀 Server running! Open the dashboard at: http://{host}:{port}/dashboard")
     socketio.run(app, host=host, port=port, debug=True)
+
 
