@@ -1,76 +1,51 @@
-# AI Supervisor Dashboard
+# AI Supervisor Dashboard  
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![Flask](https://img.shields.io/badge/Flask-WebFramework-green)
+![NLP](https://img.shields.io/badge/NLP-Rule--Based-lightgrey)
+![JSON](https://img.shields.io/badge/JSON-DataStorage-yellow)
 
-A human-in-the-loop system where an AI handles customer questions and escalates to a human supervisor when needed. Built with Python, Flask, and SocketIO.
+## 🧠 Project Overview  
+The **AI Supervisor Dashboard** is a Flask-based web application used for **automated customer query handling**.  
+It uses a **rule-based NLP system** to detect known questions and reply automatically.  
+Unresolved or unknown questions are **marked for supervisor review**.  
 
+Instead of using MySQL, the project stores data in **JSON files**, making it lightweight and easy to deploy without external databases.
 
-# Project Structure
+## 🧰 Tech Stack  
+- Python  
+- Flask (Web Framework)  
+- JSON (for storing and updating support data)  
+- HTML + CSS (Frontend UI)
 
-├── app.py # Flask backend + supervisor dashboard
-├── ai_agent.py # AI agent that handles customer questions
-├── requirements.txt # Python dependencies
-├── templates/
-│ ├── index.html # Landing page
-│ └── dashboard.html # Supervisor dashboard
-├── README.md # This file
-└── .gitignore # Ignore venv, pycache, requests.json
+## 🔍 Key Features  
+- ✅ Automatically replies to known questions using rule-based NLP  
+- ✅ Stores user queries and responses in JSON files  
+- ✅ Supervisor dashboard to view and resolve flagged queries  
+- ✅ Lightweight — no database setup required  
+- ✅ Good for demonstrating **backend + logic + UI integration**
 
+## 🚀 What I Did  
+- Implemented a **keyword-based NLP matching system** to auto-reply common queries.  
+- Stored queries, responses, and status in structured **JSON dictionaries**.  
+- Developed the Flask web interface for:
+  - Submitting queries
+  - Viewing unresolved requests
+  - Supervisor resolving flagged issues  
+- Created a simple and clean HTML/CSS UI for usability.  
 
+## 🛠 How to Run  
 
-# Setup Instructions
-Clone the repository
+### 1. Clone the Repository  
+```bash
 git clone https://github.com/Kusumagali/AI_Supervisor_dashboard.git
 cd AI_Supervisor_dashboard
-
-
-Create virtual environment
-python -m venv venv
-Activate virtual environment
-
-Windows: venv\Scripts\activate
-
-Mac/Linux: source venv/bin/activate
-
-Install dependencies
 pip install -r requirements.txt
 
-
-Run the server
+```
+## Run the Application
 python app.py
-Run the AI agent
-python ai_agent.py
-Open the dashboard
-Visit: http://127.0.0.1:5000/dashboard
 
-# Features
-AI answers customer questions automatically if known.
-
-Unanswered questions escalate to a human supervisor.
-
-Supervisor can respond via dashboard.
-
-Requests update in real-time using SocketIO.
-
-Request lifecycle: Pending → Resolved / Unresolved.
-
-Knowledge base updates automatically for repeated questions.
-
-Optional notifications and sound alerts for new requests.
-
-# Design Notes
-AI Agent: Polls and sends questions to the server, checks knowledge base.
-
-Supervisor Dashboard: Displays all requests, allows answering pending ones.
-
-Data Storage: requests.json (auto-generated) keeps track of requests.
-
-Scaling: Modular code allows scaling to hundreds of requests per day.
-
-# Next Steps / Improvements:
-
-Integrate real phone/text input (e.g., Twilio).
-
-Use a database instead of JSON for persistence.
-
-Add user authentication for supervisors.
+## Open in Browser
+http://localhost:5000
 
 
