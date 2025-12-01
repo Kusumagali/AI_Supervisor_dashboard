@@ -42,9 +42,7 @@
 
     <script>
         const tableBody = document.querySelector("table tbody");
-
-        // Automatically use Render URL
-        const socket = io(window.location.origin);
+        const socket = io(); // will auto-use current domain and correct port on Render
 
         // Enable notifications & sound
         document.getElementById("enable-notifications").addEventListener("click", () => {
@@ -82,7 +80,7 @@
                 </td>
             `;
 
-            if (highlightNew && isNew) {
+            if (highlightNew && isNew && req.status === "pending") {
                 row.classList.add("highlight");
                 row.scrollIntoView({ behavior: "smooth", block: "end" });
             }
@@ -110,7 +108,7 @@
             audio.play().catch(e => console.log("Audio play blocked"));
         }
 
-        // Fetch all existing requests
+        // Fetch existing requests
         fetch("/get_requests")
             .then(res => res.json())
             .then(data => data.forEach(req => addOrUpdateRow(req, false)));
