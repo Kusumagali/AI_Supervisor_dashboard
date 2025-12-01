@@ -1,0 +1,227 @@
+[
+    {
+        "id": "6e2b3927-7a52-477e-b368-eed8e555b4ea",
+        "customer_id": "Kushi",
+        "question": "Hi",
+        "answer": "Hello",
+        "supervisor": "Supervisor",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:08:34.395205"
+    },
+    {
+        "id": "75b52b2a-5f3b-4ac5-9df4-5ee46e51e7f6",
+        "customer_id": "Teju",
+        "question": "Hi",
+        "answer": "Hello",
+        "supervisor": "AI",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:09:17.042645"
+    },
+    {
+        "id": "957d00d1-b20c-410f-91e4-ef51cd4c0e9c",
+        "customer_id": "John",
+        "question": "Hi",
+        "answer": "Hello",
+        "supervisor": "Supervisor",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:28:05.525452"
+    },
+    {
+        "id": "be7682b4-355b-481f-a3a6-3c41d185b55f",
+        "customer_id": "John",
+        "question": "Hi",
+        "answer": "Hello",
+        "supervisor": "Supervisor",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:33:25.681602+00:00"
+    },
+    {
+        "id": "c6b97d1b-e2e9-4689-a32d-4f8a5c50526c",
+        "customer_id": "John",
+        "question": "Hi",
+        "answer": "Hello",
+        "supervisor": "AI",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:35:09.408576"
+    },
+    {
+        "id": "5ac7c729-ed6e-423a-a236-ee3bbe275c1f",
+        "customer_id": "Ali",
+        "question": "what are your working hours?",
+        "answer": null,
+        "supervisor": "Timeout",
+        "status": "unresolved",
+        "timestamp": "2025-09-13T07:35:57.547657"
+    },
+    {
+        "id": "0c4ffe2d-bff5-4220-9aae-c0255a0983b6",
+        "customer_id": "Alice",
+        "question": "Hi",
+        "answer": "Hello",
+        "supervisor": "AI",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:41:26.251266+00:00"
+    },
+    {
+        "id": "cff0ea8e-dd90-4f09-9ac4-f2e34a93e33c",
+        "customer_id": "Bob",
+        "question": "What are your working hours?",
+        "answer": "We work from 9am t0 6pm",
+        "supervisor": "Supervisor",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:43:38.247263+00:00"
+    },
+    {
+        "id": "912dad8d-a4e1-479f-90d4-bde5c5cdcf29",
+        "customer_id": "Bob",
+        "question": "Hi",
+        "answer": "Hello",
+        "supervisor": "AI",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:48:03.380402+00:00"
+    },
+    {
+        "id": "cccfe2a7-9738-4d56-8a6c-6af7c4e24c3d",
+        "customer_id": "Bob",
+        "question": "Hello",
+        "answer": "Yeah tell me !",
+        "supervisor": "Supervisor",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:48:10.884394+00:00"
+    },
+    {
+        "id": "d879ad60-928a-402a-b9c5-d3d6658ce666",
+        "customer_id": "Kushi",
+        "question": "Hi",
+        "answer": "Hello",
+        "supervisor": "AI",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:54:04.434757+00:00"
+    },
+    {
+        "id": "b8e483e9-ecb6-4d9e-85f2-136c70397238",
+        "customer_id": "Kushi",
+        "question": "Hello",
+        "answer": "Yeah tell me !",
+        "supervisor": "Supervisor",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:54:08.984781+00:00"
+    },
+    {
+        "id": "91c4ad40-c5fa-484f-bc62-805fa3f41fca",
+        "customer_id": "Kushi",
+        "question": "Hello",
+        "answer": "Yeah tell me !",
+        "supervisor": "Supervisor",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:55:05.381072+00:00"
+    },
+    {
+        "id": "53bb9132-e427-46ac-9dc9-8b7fe9482566",
+        "customer_id": "John",
+        "question": "Hello",
+        "answer": "Yeah tell me !",
+        "supervisor": "Supervisor",
+        "status": "resolved",
+        "timestamp": "2025-09-13T07:58:49.580257+00:00"
+    },
+    {
+        "id": "5eb11a68-fdae-4b5c-95eb-ad7d8bc63db7",
+        "customer_id": "Hani",
+        "question": "How long it may take?",
+        "answer": null,
+        "supervisor": "Timeout",
+        "status": "unresolved",
+        "timestamp": "2025-09-13T08:04:58.799127+00:00"
+    },
+    {
+        "id": "78ce5cc1-17db-4c0a-9659-00155478fe62",
+        "customer_id": "Hani",
+        "question": "Hello",
+        "answer": "Yeah tell me !",
+        "supervisor": "AI",
+        "status": "resolved",
+        "timestamp": "2025-09-13T08:05:32.315643+00:00"
+    },
+    {
+        "id": "61e26cd2-dadf-4670-b38d-139794bb6360",
+        "customer_id": "Hani",
+        "question": "hello",
+        "answer": "Yeah tell me !",
+        "supervisor": "AI",
+        "status": "resolved",
+        "timestamp": "2025-09-13T08:05:38.628447+00:00"
+    },
+    {
+        "id": "75f60492-821b-459b-8740-79d68f5e43b0",
+        "customer_id": "Hani",
+        "question": "Hlo",
+        "answer": null,
+        "supervisor": "Timeout",
+        "status": "unresolved",
+        "timestamp": "2025-09-13T08:05:43.745407+00:00"
+    },
+    {
+        "id": "42edf75d-c8ea-400b-b1cd-8154d2bdd669",
+        "customer_id": "Don",
+        "question": "What are you good at",
+        "answer": null,
+        "supervisor": "Timeout",
+        "status": "unresolved",
+        "timestamp": "2025-09-13T08:08:54.099103+00:00"
+    },
+    {
+        "id": "8cbfc05a-be83-452c-921c-58f5a692af2e",
+        "customer_id": "Kushi",
+        "question": "What",
+        "answer": null,
+        "supervisor": "Timeout",
+        "status": "unresolved",
+        "timestamp": "2025-09-13T08:21:25.751364+00:00"
+    },
+    {
+        "id": "035c84cb-6027-4102-8ad2-cdf0a2813a45",
+        "customer_id": "kushi",
+        "question": "woww",
+        "answer": null,
+        "supervisor": "Timeout",
+        "status": "unresolved",
+        "timestamp": "2025-09-13T08:24:12.379810+00:00"
+    },
+    {
+        "id": "8049a22d-06a4-4d47-ad47-e403b7816bf0",
+        "customer_id": "h",
+        "question": "h",
+        "answer": null,
+        "supervisor": "Timeout",
+        "status": "unresolved",
+        "timestamp": "2025-09-13T08:24:43.564119+00:00"
+    },
+    {
+        "id": "61687129-ccd3-4b07-ad63-19f821d17422",
+        "customer_id": "h",
+        "question": "h",
+        "answer": null,
+        "supervisor": "Timeout",
+        "status": "unresolved",
+        "timestamp": "2025-09-13T08:26:21.374584+00:00"
+    },
+    {
+        "id": "9e9b8fed-4b46-476f-a7d0-74e04472179d",
+        "customer_id": "Alice",
+        "question": "How may it long ",
+        "answer": "Usually it makes 2 to 3 business days",
+        "supervisor": "Supervisor",
+        "status": "resolved",
+        "timestamp": "2025-09-15T16:57:11.025453+00:00"
+    },
+    {
+        "id": "0de29386-6755-445c-a908-1a24d425a8e0",
+        "customer_id": "Charlie",
+        "question": "What are your timings?",
+        "answer": "Usually we are open from 9Am to 6PM",
+        "supervisor": "Supervisor",
+        "status": "resolved",
+        "timestamp": "2025-09-15T17:16:23.569592+00:00"
+    }
+]
