@@ -4,7 +4,8 @@ from datetime import datetime, timedelta, timezone
 import uuid, json, threading, os
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
+
 
 DATA_FILE = "requests.json"
 TIMEOUT_MINUTES = 5
@@ -131,6 +132,7 @@ def update_request(req_id):
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=5000)
+
 
 
 
