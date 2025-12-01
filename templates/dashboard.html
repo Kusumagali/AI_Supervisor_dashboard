@@ -42,8 +42,9 @@
 
     <script>
         const tableBody = document.querySelector("table tbody");
-        const socket = io(window.location.origin);
+        const socket = io();
 
+        // Enable notifications & sound
         document.getElementById("enable-notifications").addEventListener("click", () => {
             if ("Notification" in window && Notification.permission !== "granted") {
                 Notification.requestPermission();
@@ -79,7 +80,7 @@
                 </td>
             `;
 
-            if (highlightNew && isNew && req.status === "pending") {
+            if (highlightNew && isNew) {
                 row.classList.add("highlight");
                 row.scrollIntoView({ behavior: "smooth", block: "end" });
             }
@@ -107,6 +108,7 @@
             audio.play().catch(e => console.log("Audio play blocked"));
         }
 
+        // Fetch all requests on load
         fetch("/get_requests")
             .then(res => res.json())
             .then(data => data.forEach(req => addOrUpdateRow(req, false)));
