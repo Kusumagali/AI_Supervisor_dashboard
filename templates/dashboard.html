@@ -1,59 +1,127 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>📞 Supervisor Dashboard</title>
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<style>
-body { font-family: Arial; background: #f4f4f4; padding: 20px; }
-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-th { background: #007bff; color: white; }
-.pending { background: #fff3cd; font-weight: bold; color: #856404; }
-.resolved { background: #d4edda; font-weight: bold; color: #155724; }
-</style>
+    <title>📞 Supervisor Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
+        h1, h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .pending { color: orange; font-weight: bold; background: #fff3e0; }
+        .resolved.ai { color: green; font-weight: bold; }
+        .resolved.supervisor { color: blue; font-weight: bold; }
+        .unresolved { color: red; font-weight: bold; }
+        input[type="text"] { width: 90%; padding: 5px; }
+        button { padding: 5px 10px; background: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background: #218838; }
+        .highlight { animation: highlight 2s ease; }
+        @keyframes highlight { 0% { background-color: #ffff99; } 100% { background-color: inherit; } }
+    </style>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
-
 <body>
-<h1>📞 Supervisor Dashboard</h1>
+    <h1>📞 Supervisor Dashboard</h1>
+    <h2>All Requests</h2>
+    <button id="enable-notifications">Enable Notifications & Sound</button>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Question</th>
+                <th>Answer</th>
+                <th>Supervisor</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
-<table>
-<thead>
-<tr>
-<th>ID</th><th>Customer</th><th>Question</th><th>Answer</th><th>Status</th><th>Action</th>
-</tr></thead><tbody></tbody></table>
+    <script>
+        const tableBody = document.querySelector("table tbody");
+        const socket = io("http://127.0.0.1:5000");
 
-<script>
-const tbody = document.querySelector("tbody");
-const socket = io();
+        // Enable notifications & sound
+        document.getElementById("enable-notifications").addEventListener("click", () => {
+            if ("Notification" in window && Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+            new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3').play().catch(e => {});
+            document.getElementById("enable-notifications").style.display = "none";
+        });
 
-function addRow(req) {
-    let statusColor = req.status;
-    let btn = req.status === "pending" ?
-        `<input id="ans-${req.id}" placeholder="Answer"><button onclick="sendAnswer('${req.id}')">Submit</button>` : "-";
-    let row = document.getElementById(req.id) || document.createElement("tr");
-    row.id = req.id;
-    row.innerHTML = `
-        <td>${req.id}</td>
-        <td>${req.customer_id}</td>
-        <td>${req.question}</td>
-        <td>${req.answer || ""}</td>
-        <td class="${statusColor}">${req.status}</td>
-        <td>${btn}</td>
-    `;
-    if(!document.getElementById(req.id)) tbody.appendChild(row);
-}
+        function addOrUpdateRow(req, highlightNew = true) {
+            let row = document.getElementById("row-" + req.id);
+            const isNew = !row;
+            if (!row) {
+                row = document.createElement("tr");
+                row.id = "row-" + req.id;
+                tableBody.appendChild(row);
+            }
 
-function sendAnswer(id) {
-    let ans = document.getElementById("ans-" + id).value;
-    fetch("/requests/" + id, {
-        method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answer: ans })
-    });
-}
+            let statusClass = req.status.toLowerCase();
+            if (req.status === "resolved") statusClass += req.supervisor === "AI" ? " ai" : " supervisor";
 
-fetch("/get_requests").then(r => r.json()).then(data => data.forEach(addRow));
-socket.on("incoming_request", addRow);
-socket.on("request_answered", addRow);
-</script>
+            row.innerHTML = `
+                <td>${req.id}</td>
+                <td>${req.customer_id}</td>
+                <td>${req.question}</td>
+                <td>${req.answer || "N/A"}</td>
+                <td>${req.supervisor || "N/A"}</td>
+                <td class="${statusClass}">${req.status.charAt(0).toUpperCase() + req.status.slice(1)}</td>
+                <td>
+                    ${req.status === "pending" ? 
+                        `<input type="text" id="answer-${req.id}" placeholder="Enter answer">
+                         <button onclick="submitAnswer('${req.id}')">Submit</button>` 
+                        : "-"}
+                </td>
+            `;
+
+            if (highlightNew && isNew && req.status === "pending") {
+                row.classList.add("highlight");
+                row.scrollIntoView({ behavior: "smooth", block: "end" });
+            }
+        }
+
+        async function submitAnswer(reqId) {
+            const answer = document.getElementById("answer-" + reqId).value;
+            if (!answer) { alert("Please enter an answer!"); return; }
+
+            const res = await fetch(`/requests/${reqId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ answer: answer, supervisor: "Supervisor" })
+            });
+
+            if (res.ok) alert("Answer submitted successfully!");
+            else alert("Error submitting answer.");
+        }
+
+        function notifyNewRequest(req) {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+            new Notification(`New request from ${req.customer_id}`, { body: req.question });
+            const audio = new Audio('https://www.soundjay.com/buttons/sounds/button-3.mp3');
+            audio.play().catch(e => console.log("Audio play blocked"));
+        }
+
+        // Fetch existing requests
+        fetch("/get_requests")
+            .then(res => res.json())
+            .then(data => data.forEach(req => addOrUpdateRow(req, false)));
+
+        socket.on("connect", () => console.log("✅ Socket connected"));
+        socket.on("disconnect", () => console.log("❌ Socket disconnected"));
+
+        socket.on("incoming_call", (req) => {
+            addOrUpdateRow(req);
+            if (req.status === "pending") notifyNewRequest(req);
+        });
+
+        socket.on("request_answered", (req) => addOrUpdateRow(req, false));
+    </script>
 </body>
 </html>
