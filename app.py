@@ -4,7 +4,8 @@ from datetime import datetime
 import json, os, uuid
 
 app = Flask(__name__)
-socketio = SocketIO(app, async_mode="threading", cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+
 
 DATA_FILE = "requests.json"
 
@@ -84,3 +85,4 @@ def answer_request(req_id):
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
