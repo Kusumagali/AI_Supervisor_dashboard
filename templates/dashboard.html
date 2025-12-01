@@ -42,9 +42,8 @@
 
     <script>
         const tableBody = document.querySelector("table tbody");
-        const socket = io(); // will auto-use current domain and correct port on Render
+        const socket = io(window.location.origin);
 
-        // Enable notifications & sound
         document.getElementById("enable-notifications").addEventListener("click", () => {
             if ("Notification" in window && Notification.permission !== "granted") {
                 Notification.requestPermission();
@@ -108,7 +107,6 @@
             audio.play().catch(e => console.log("Audio play blocked"));
         }
 
-        // Fetch existing requests
         fetch("/get_requests")
             .then(res => res.json())
             .then(data => data.forEach(req => addOrUpdateRow(req, false)));
