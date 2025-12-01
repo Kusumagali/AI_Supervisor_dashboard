@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO
 from datetime import datetime, timedelta, timezone
-import uuid, json, threading, os
+import uuid, json, os, threading
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")  # Threading mode
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 DATA_FILE = "requests.json"
 TIMEOUT_MINUTES = 5
@@ -14,7 +14,7 @@ if os.path.exists(DATA_FILE):
     try:
         with open(DATA_FILE, "r") as f:
             requests_store = {r["id"]: r for r in json.load(f)}
-    except:
+    except (json.JSONDecodeError, FileNotFoundError):
         requests_store = {}
 else:
     requests_store = {}
@@ -26,6 +26,7 @@ def save_requests():
     except Exception as e:
         print("Error saving requests:", e)
 
+# Check for timeouts every 30 seconds
 def check_timeouts():
     while True:
         now = datetime.now(timezone.utc)
@@ -58,19 +59,23 @@ def dashboard():
 
 @app.route("/get_requests")
 def get_requests():
-    return jsonify(sorted(requests_store.values(), key=lambda r: r["timestamp"]))
+    all_requests = sorted(
+        requests_store.values(),
+        key=lambda r: r["status"] != "pending"
+    )
+    return jsonify(all_requests)
 
 @app.route("/requests", methods=["POST"])
 def create_request():
     data = request.json
     customer_id = data.get("customer_id")
-    question = data.get("question")
-    normalized_question = question.strip().lower()
+    question = data.get("question").strip()
+    normalized = question.lower()
 
-    # Check if AI knows the answer
+    # Check AI knowledge
     for r in requests_store.values():
-        if r["question"].strip().lower() == normalized_question and r["status"] == "resolved":
-            new_request = {
+        if r["question"].strip().lower() == normalized and r["status"] == "resolved":
+            new_req = {
                 "id": str(uuid.uuid4()),
                 "customer_id": customer_id,
                 "question": question,
@@ -79,15 +84,14 @@ def create_request():
                 "status": "resolved",
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
-            requests_store[new_request["id"]] = new_request
+            requests_store[new_req["id"]] = new_req
             save_requests()
-            socketio.emit("incoming_call", new_request)
-            return jsonify({"message": "Answered by AI", "request": new_request})
+            socketio.emit("incoming_call", new_req)
+            return jsonify(new_req)
 
     # Unknown question → pending
-    req_id = str(uuid.uuid4())
-    new_request = {
-        "id": req_id,
+    new_req = {
+        "id": str(uuid.uuid4()),
         "customer_id": customer_id,
         "question": question,
         "answer": None,
@@ -95,10 +99,10 @@ def create_request():
         "status": "pending",
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
-    requests_store[req_id] = new_request
+    requests_store[new_req["id"]] = new_req
     save_requests()
-    socketio.emit("incoming_call", new_request)
-    return jsonify({"message": "Request created", "request": new_request})
+    socketio.emit("incoming_call", new_req)
+    return jsonify(new_req)
 
 @app.route("/requests/<req_id>", methods=["PUT"])
 def update_request(req_id):
@@ -114,12 +118,10 @@ def update_request(req_id):
     requests_store[req_id]["status"] = "resolved"
     save_requests()
     socketio.emit("request_answered", requests_store[req_id])
-    return jsonify({"message": "Request updated", "request": requests_store[req_id]})
+    return jsonify(requests_store[req_id])
 
 # ------------------- MAIN -------------------
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
-
-
