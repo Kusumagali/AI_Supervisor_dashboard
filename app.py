@@ -1,127 +1,86 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_socketio import SocketIO
-from datetime import datetime, timedelta, timezone
-import uuid, json, os, threading
+from datetime import datetime
+import json, os, uuid
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+socketio = SocketIO(app, async_mode="threading", cors_allowed_origins="*")
 
 DATA_FILE = "requests.json"
-TIMEOUT_MINUTES = 5
 
-# Load existing requests
-if os.path.exists(DATA_FILE):
-    try:
-        with open(DATA_FILE, "r") as f:
-            requests_store = {r["id"]: r for r in json.load(f)}
-    except (json.JSONDecodeError, FileNotFoundError):
-        requests_store = {}
-else:
-    requests_store = {}
+# Load stored requests
+def load_requests():
+    return json.load(open(DATA_FILE)) if os.path.exists(DATA_FILE) else []
 
-def save_requests():
-    try:
-        with open(DATA_FILE, "w") as f:
-            json.dump(list(requests_store.values()), f, indent=4)
-    except Exception as e:
-        print("Error saving requests:", e)
+# Save stored requests
+def save_requests(data):
+    json.dump(data, open(DATA_FILE, "w"))
 
-# Check for timeouts every 30 seconds
-def check_timeouts():
-    while True:
-        now = datetime.now(timezone.utc)
-        for req in requests_store.values():
-            if req["status"] == "pending":
-                try:
-                    created_time = datetime.fromisoformat(req["timestamp"])
-                    if created_time.tzinfo is None:
-                        created_time = created_time.replace(tzinfo=timezone.utc)
-                    if now - created_time > timedelta(minutes=TIMEOUT_MINUTES):
-                        req["status"] = "unresolved"
-                        req["supervisor"] = "Timeout"
-                        save_requests()
-                        socketio.emit("request_answered", req)
-                except Exception as e:
-                    print("Timeout check error:", e)
-        socketio.sleep(30)
+requests_store = load_requests()
 
-threading.Thread(target=check_timeouts, daemon=True).start()
-
-# ------------------- ROUTES -------------------
+# Knowledge base (AI)
+known_answers = {
+    "what is your name": "I am AI Customer Assistant.",
+    "what are your working hours": "We are open 24/7.",
+    "how can i contact support": "You can contact support at support@example.com."
+}
 
 @app.route("/")
-def index():
-    return render_template("index.html")
-
-@app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
+    return send_from_directory("", "dashboard.html")
 
-@app.route("/get_requests")
+@app.route("/get_requests", methods=["GET"])
 def get_requests():
-    all_requests = sorted(
-        requests_store.values(),
-        key=lambda r: r["status"] != "pending"
-    )
-    return jsonify(all_requests)
+    return jsonify(requests_store)
 
 @app.route("/requests", methods=["POST"])
 def create_request():
     data = request.json
-    customer_id = data.get("customer_id")
-    question = data.get("question").strip()
-    normalized = question.lower()
+    req_id = str(uuid.uuid4())
 
-    # Check AI knowledge
-    for r in requests_store.values():
-        if r["question"].strip().lower() == normalized and r["status"] == "resolved":
-            new_req = {
-                "id": str(uuid.uuid4()),
-                "customer_id": customer_id,
-                "question": question,
-                "answer": r["answer"],
-                "supervisor": "AI",
-                "status": "resolved",
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
-            requests_store[new_req["id"]] = new_req
-            save_requests()
-            socketio.emit("incoming_call", new_req)
-            return jsonify(new_req)
+    question = data["question"].lower().strip()
+    customer = data["customer_id"].strip()
 
-    # Unknown question → pending
+    # AI auto-answer if known
+    if question in known_answers:
+        answer = known_answers[question]
+        status = "resolved"
+        supervisor = "AI"
+    else:
+        answer = ""
+        status = "pending"
+        supervisor = ""
+
     new_req = {
-        "id": str(uuid.uuid4()),
-        "customer_id": customer_id,
-        "question": question,
-        "answer": None,
-        "supervisor": None,
-        "status": "pending",
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "id": req_id,
+        "customer_id": customer,
+        "question": data["question"],
+        "answer": answer,
+        "supervisor": supervisor,
+        "status": status,
+        "timestamp": datetime.utcnow().isoformat()
     }
-    requests_store[new_req["id"]] = new_req
-    save_requests()
-    socketio.emit("incoming_call", new_req)
-    return jsonify(new_req)
+
+    requests_store.append(new_req)
+    save_requests(requests_store)
+
+    socketio.emit("incoming_request", new_req)
+    return jsonify({"success": True, "request": new_req})
+
 
 @app.route("/requests/<req_id>", methods=["PUT"])
-def update_request(req_id):
+def answer_request(req_id):
     data = request.json
-    answer = data.get("answer")
-    supervisor = data.get("supervisor", "Supervisor")
+    for r in requests_store:
+        if r["id"] == req_id:
+            r["answer"] = data["answer"]
+            r["supervisor"] = "Supervisor"
+            r["status"] = "resolved"
+            save_requests(requests_store)
+            socketio.emit("request_answered", r)
+            return jsonify({"success": True, "updated": r})
+    return jsonify({"success": False, "message": "Not found"}), 404
 
-    if req_id not in requests_store:
-        return jsonify({"error": "Request not found"}), 404
-
-    requests_store[req_id]["answer"] = answer
-    requests_store[req_id]["supervisor"] = supervisor
-    requests_store[req_id]["status"] = "resolved"
-    save_requests()
-    socketio.emit("request_answered", requests_store[req_id])
-    return jsonify(requests_store[req_id])
-
-# ------------------- MAIN -------------------
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
+    socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
