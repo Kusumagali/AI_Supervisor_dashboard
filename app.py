@@ -4,14 +4,12 @@ from datetime import datetime, timedelta, timezone
 import uuid, json, threading, os
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
-
-
+socketio = SocketIO(app, cors_allowed_origins="*")  # no async_mode
 
 DATA_FILE = "requests.json"
 TIMEOUT_MINUTES = 5
 
-# Load existing requests safely
+# Load existing requests
 try:
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r") as f:
@@ -21,7 +19,6 @@ try:
 except (json.JSONDecodeError, FileNotFoundError):
     requests_store = {}
 
-# Save requests safely
 def save_requests():
     try:
         with open(DATA_FILE, "w") as f:
@@ -29,10 +26,9 @@ def save_requests():
     except Exception as e:
         print("Error saving requests:", e)
 
-# Background thread to check for pending request timeouts
 def check_timeouts():
     while True:
-        now = datetime.now(timezone.utc)  # timezone-aware
+        now = datetime.now(timezone.utc)
         for req in requests_store.values():
             if req["status"] == "pending":
                 try:
@@ -46,7 +42,7 @@ def check_timeouts():
                         socketio.emit("request_answered", req)
                 except Exception as e:
                     print("Error checking request timeout:", e)
-        socketio.sleep(30)  # check every 30 seconds
+        socketio.sleep(30)
 
 threading.Thread(target=check_timeouts, daemon=True).start()
 
@@ -62,32 +58,33 @@ def dashboard():
 
 @app.route("/ask", methods=["POST"])
 def ask():
-    question = request.form.get("question")  # from the form input
+    question = request.form.get("question")
     if question.lower() in ["hi", "hello"]:
         answer = "Hello! How can I help you?"
     else:
         answer = "Go to Supervisor Dashboard"
-    return answer  # You can also return jsonify({"answer": answer})
+    return answer
 
 @app.route("/get_requests")
 def get_requests():
-    return jsonify(list(requests_store.values()))
+    all_requests = sorted(requests_store.values(), key=lambda r: r["status"] != "pending")
+    return jsonify(all_requests)
 
 @app.route("/requests", methods=["POST"])
 def create_request():
     data = request.json
     customer_id = data.get("customer_id")
     question = data.get("question")
+    normalized_question = question.strip().lower()
 
-    # Check knowledge base (resolved answers)
+    # Check AI knowledge
     for r in requests_store.values():
-        if r["question"].lower() == question.lower() and r["status"] == "resolved":
-            auto_answer = r["answer"]
+        if r["question"].strip().lower() == normalized_question and r["status"] == "resolved":
             new_request = {
                 "id": str(uuid.uuid4()),
                 "customer_id": customer_id,
                 "question": question,
-                "answer": auto_answer,
+                "answer": r["answer"],
                 "supervisor": "AI",
                 "status": "resolved",
                 "timestamp": datetime.now(timezone.utc).isoformat()
@@ -95,9 +92,9 @@ def create_request():
             requests_store[new_request["id"]] = new_request
             save_requests()
             socketio.emit("incoming_call", new_request)
-            return jsonify({"message": "Answered from knowledge base", "request": new_request})
+            return jsonify({"message": "Answered by AI", "request": new_request})
 
-    # Otherwise create pending request
+    # Unknown → pending
     req_id = str(uuid.uuid4())
     new_request = {
         "id": req_id,
@@ -132,7 +129,11 @@ def update_request(req_id):
 # ------------------- MAIN -------------------
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000, allow_unsafe_werkzeug=True)
+    port = int(os.environ.get("PORT", 5000))
+    # allow Werkzeug in production (Render)
+    socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
+
+
 
 
 
