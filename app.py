@@ -130,9 +130,7 @@ def update_request(req_id):
 # ------------------- MAIN -------------------
 
 if __name__ == "__main__":
-    host = "127.0.0.1"
-    port = 5000
-    print(f"🚀 Server running! Open the dashboard at: http://{host}:{port}/dashboard")
-    socketio.run(app, host=host, port=port, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000)
+
 
 
