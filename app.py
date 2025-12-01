@@ -130,14 +130,4 @@ def update_request(req_id):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    # allow Werkzeug in production (Render)
     socketio.run(app, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
-
-
-
-
-
-
-
-
-
